@@ -11,32 +11,50 @@ student_behavior["BMI"]=bmi #added bmi column to dataset
 student_behavior["averageMARKS"]=averageMARKS
 
 fullmodel=lm(
-  college.mark ~ Department + Gender + BMI + Stress.Level + Financial.Status + Travelling.Time + salary.expectation
-  , data =student_behavior
-)
-summary(fullmodel)
-plot(fullmodel$residuals,fullmodel$fitted.values)
-qqnorm(fullmodel$residuals)
-qqline(fullmodel$residuals)
-dwtest(fullmodel)
-fullmodel.log=lm(
-  sqrt(college.mark) ~ Department + Gender + BMI + Stress.Level + Financial.Status + Travelling.Time + salary.expectation
+  averageMARKS ~ Department + Gender + BMI + Stress.Level + Financial.Status + Travelling.Time + social.medai...video + hobbies +daily.studing.time
   , data =student_behavior
 )
 
-plot(fullmodel.log$residuals,fullmodel$fitted.values)
-qqnorm(fullmodel.log$residuals)
-qqline(fullmodel.log$residuals)
-library(lmtest)
-dwtest(fullmodel.log)
+interaction.plot(student_behavior$daily.studing.time, student_behavior$social.medai...video,averageMARKS,xlab = "Studying time",ylab="Average Marks"
+                 ,trace.label = "Social Media Usage", main= "Interaction Plot between Study Time and Social Media Usage")
+
+interaction.plot(student_behavior$Stress.Level,student_behavior$daily.studing.time,averageMARKS, xlab = "Stress Level",ylab="Average Marks"
+                 ,trace.label = "Studying Time", main= "Interaction Plot between Stress Level and Studying Time")
+interaction.plot(student_behavior$Stress.Level,student_behavior$social.medai...video,averageMARKS, xlab = "Stress Level",ylab="Average Marks"
+                 ,trace.label = "Social Media Usage", main= "Interaction Plot between Stress Level and Social Media Usage" )
+interaction.plot(student_behavior$Stress.Level,student_behavior$Financial.Status,averageMARKS, xlab = "Stress Level",ylab="Average Marks"
+                 ,trace.label = "Financial Status", main= "Interaction Plot between Stress Level and Financial Status")
+
+
+interaction.model= fullmodel=lm(
+  averageMARKS ~ Department + Gender + 
+    BMI + Stress.Level + 
+    Financial.Status + Travelling.Time + 
+    social.medai...video + hobbies +daily.studing.time +
+    daily.studing.time*Stress.Level+social.medai...video*Stress.Level +
+    + daily.studing.time*social.medai...video+Financial.Status*Stress.Level,
+  data =student_behavior
+)
+summary(interaction.model)
+
+significant.model=lm((averageMARKS)^2~Gender+Stress.Level+social.medai...video
+                     +Stress.Level*social.medai...video
+                     +daily.studing.time+daily.studing.time*social.medai...video,
+                     data = student_behavior)
 
 library(MASS)
-reduced=stepAIC(fullmodel)
-summary(reduced)
+final.model=stepAIC(significant.model)
 
-plot(reduced$residuals,fullmodel$fitted.values)
-qqnorm(reduced$residuals)
-qqline(reduced$residuals)
-dwtest(reduced)
+plot(final.model$fitted.values, final.model$residuals,xlab = "Fitted Values", ylab="Residuals", main="Diagnostic Plot of AIC Model")
+qqnorm(fullmodel$residuals,main = "QQ Plot of AIC Model")
+qqline(full.model$residuals)
+library(lmtest)
+dwtest(fullmodel)
+library(car)
+vif(final.model,type="predictor")
+shapiro.test(student_behavior$averageMARKS)
+
+
+
 
 
